@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .weather-app {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    input {
+      width: 70%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+    }
+    .result h3 {
+      margin: 5px 0;
+    }
+    .temp {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="weather-app">
+    <h2>🌤 Weather App</h2>
+    <input type="text" id="cityInput" placeholder="Enter city or city,countryCode">
+    <button onclick="getWeather()">Get Weather</button>
+    <button onclick="clearWeather()">Clear</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+   async function getWeather() {
+  const apiKey = "b2f9fa210a29855e77f489c9b7f455a5"; // replace with your API key
+  const city = document.getElementById("cityInput").value.trim();
+  const result = document.getElementById("result");
+
+  // Clear previous timeout (if any)
+  if (window.messageTimeout) {
+    clearTimeout(window.messageTimeout);
+  }
+
+  // Check if input is empty
+  if (city === "") {
+    result.innerHTML = "<p style='color:red;'>⚠️ Please enter a city name.</p>";
+    autoClearMessage();
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+    );
+    const data = await response.json();
+
+    if (data.cod === "404") {
+      result.innerHTML = `<p style='color:red;'>❌ City not found. Try again.</p>`;
+    } else if (data.cod === 200) {
+      result.innerHTML = `
+        <h3>${data.name}, ${data.sys.country}</h3>
+        <p><b>Temperature:</b> ${data.main.temp}°C</p>
+        <p><b>Condition:</b> ${data.weather[0].description}</p>
+        <p><b>Humidity:</b> ${data.main.humidity}%</p>
+        <p><b>Wind Speed:</b> ${data.wind.speed} m/s</p>
+      `;
+    } else {
+      result.innerHTML = `<p style='color:red;'>⚠️ Error: ${data.message}</p>`;
+    }
+
+    autoClearMessage();
+  } catch (error) {
+    result.innerHTML = `<p style='color:red;'>⚠️ Something went wrong. Please try again.</p>`;
+    console.error(error);
+    autoClearMessage();
+  }
+}
+
+function clearWeather() {
+  document.getElementById("cityInput").value = "";
+  document.getElementById("result").innerHTML = "";
+}
+
+// Function to clear messages after 10 seconds
+function autoClearMessage() {
+  window.messageTimeout = setTimeout(() => {
+    document.getElementById("result").innerHTML = "";
+  }, 20000); // 10000 ms = 10 seconds
+}
+
+  </script>
+</body>
+</html>
